@@ -139,7 +139,7 @@ public class App {
                 account.toString();
                 System.out.println("");
 
-                operateAccount(account);
+                operateAccount(account, bank);
             } else {
                 System.out.printf("Conta %d não encontrada", accNumber);
             }
@@ -152,7 +152,7 @@ public class App {
         sc.close();
     }
 
-    private static void operateAccount(Account account) {
+    private static void operateAccount(Account account, Bank bank) {
         Scanner sc = new Scanner(System.in);
         boolean toBack = false;
 
@@ -178,12 +178,12 @@ public class App {
                         operateDeposit(account);
                         break;
                     case 4:
-                        operateTransfer(account);
+                        operateTransfer(account, bank);
                         break;
                     case 5:
                         System.out.println("Voltando...");
                         break;
-                    default :
+                    default:
                         System.out.println("");
                         System.out.println("Digite uma opção válida.");
                         System.out.println("");
@@ -199,7 +199,122 @@ public class App {
         sc.close();
     }
 
+    private static void operateTransfer(Account account, Bank bank) {
+        System.out.println("==== Transferência ====");
+        Scanner sc = new Scanner(System.in);
+
+        try {
+            System.out.println("Digite o valor a ser transferido:");
+            double amount = sc.nextDouble();
+
+            System.out.println("Digite o número da conta a receber:");
+            int accNumber = sc.nextInt();
+            Account accountToReceive = bank.getAccountByNumber(accNumber);
+
+            System.out.println("");
+            System.out.println("Depositante:");
+            account.toString();
+            System.out.println("Destinatário:");
+            accountToReceive.toString();
+            System.out.println("Valor a ser transferido: R$" + String.format("%.2f", amount));
+
+            System.out.println("Confirme(y/n): ");
+            String ch = sc.nextLine();
+
+            if (ch.charAt(0) == 'y') {
+                account.transfer(amount, accountToReceive);
+                ;
+                System.out.println("Transferência realizada com sucesso.");
+            } else {
+                System.out.println("Voltando...");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("");
+        } catch (Exception e) {
+            System.out.println("Erro na operação de depósito. " + e.getMessage());
+        }
+        sc.close();
+    }
+
+    private static void operateDeposit(Account account) {
+        System.out.println("==== Depósito ====");
+        Scanner sc = new Scanner(System.in);
+
+        try {
+            System.out.println("Digite o valor a ser depositado:");
+            double amount = sc.nextDouble();
+
+            System.out.println("Confirme(y/n): ");
+            String ch = sc.nextLine();
+
+            if (ch.charAt(0) == 'y') {
+                account.deposit(amount);
+                System.out.println("Depósito realizado com sucesso.");
+            } else {
+                System.out.println("Voltando...");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("");
+        } catch (Exception e) {
+            System.out.println("Erro na operação de depósito. " + e.getMessage());
+        }
+        sc.close();
+    }
+
+    private static void operateWithdraw(Account account) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("==== SAQUE ====");
+        try {
+            System.out.println("Digite o valor a ser sacado:");
+            double amount = sc.nextDouble();
+            account.withdraw(amount);
+
+            System.out.println("");
+            System.out.println("Saque realizado com sucesso!");
+            System.out.println("");
+        } catch (InputMismatchException e) {
+            System.out.println("Digite um número válido.");
+        } catch (Exception e) {
+            System.out.println("Erro durante o saque." + e.getMessage());
+        }
+        sc.close();
+    }
+
     private static void createNewAccount(Bank bank) {
+        System.out.println("==== Criar nova conta ====");
+        Client client = createNewClient();
+
+        List<Account> accounts = bank.getAccounts();
+
+        int number = accounts.size();
+
+        Account account = new Account(number, client, 0.0);
+
+        bank.addAccount(account);
+        System.out.println("Conta criada com sucesso.%n");
+
+    }
+
+    private static Client createNewClient() {
+        Scanner sc = new Scanner(System.in);
+        try {
+            System.out.println("");
+            System.out.println("Digite o nome do cliente:");
+            String name = sc.nextLine();
+            System.out.println("Digite o CPF:");
+            String cpf = sc.nextLine();
+
+            Client client = new Client(name, cpf);
+            sc.close();
+            return client;
+        } catch (InputMismatchException e) {
+            System.out.println("Digite um valor válido.");
+        } catch (Exception e) {
+            System.out.println("Erro durante a criação do novo cliente." + e.getMessage());
+        }
+        sc.close();
+        return null;
 
     }
 }
